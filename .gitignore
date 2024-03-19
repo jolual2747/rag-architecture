@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Data 
+embeddings_dataset.csv
+
 # Distribution / packaging
 .Python
 build/

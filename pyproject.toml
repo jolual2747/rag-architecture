@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "rag"
+version = "0.1.0"
+description = "RAG Architecture examples"
+authors = ["Jose Alcocer <jolual2747@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+transformers = "^4.38.2"
+pandas = "1.5"
+requests = "^2.31.0"
+ipykernel = "^6.29.3"
+sentence-transformers = "^2.5.1"
+openai = "^1.14.1"
+chromadb = "^0.4.24"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
