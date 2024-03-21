@@ -14,6 +14,8 @@ ipykernel = "^6.29.3"
 sentence-transformers = "^2.5.1"
 openai = "^1.14.1"
 chromadb = "^0.4.24"
+gensim = "^4.3.2"
+nltk = "^3.8.1"
 
 
 [build-system]
