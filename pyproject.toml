@@ -6,16 +6,15 @@ authors = ["Jose Alcocer <jolual2747@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-transformers = "^4.38.2"
+python = "^3.8.1"
 pandas = "1.5"
-requests = "^2.31.0"
-ipykernel = "^6.29.3"
-sentence-transformers = "^2.5.1"
-openai = "^1.14.1"
-chromadb = "^0.4.24"
+transformers = "4.32.1"
+chromadb = "0.3.29"
+ipykernel = "^6.29.4"
+openai = "^1.14.3"
 gensim = "^4.3.2"
 nltk = "^3.8.1"
+langchain = "^0.1.13"
 
 
 [build-system]

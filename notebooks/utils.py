@@ -7,35 +7,35 @@ nltk.download('stopwords')
 nltk.download('punkt')
 
 def clean_text(sentence_batch) -> dict:
-    # extrae el texto de la entrada
+
+    # Extracts text from the batch
     text_list = sentence_batch['text']
 
     cleaned_text_list = []
     for text in text_list:
-        # Convierte el texto a minúsculas
+        # Text to lower
         text = text.lower()
 
-        # Elimina URLs
+        # Delete URLs
         text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)
 
-        # Elimina las menciones @ y '#' de las redes sociales
+        # Delete mentions @ and '#' from social media
         text = re.sub(r'\@\w+|\#\w+', '', text)
 
-        # Elimina los caracteres de puntuación
+        # Delete punctuation
         text = strip_punctuation(text)
 
-        # Elimina los números
+        # Delete numbers
         text = strip_numeric(text)
 
-        # Elimina las palabras cortas
+        # Delete short words
         text = strip_short(text, minsize=4)
 
-        # Elimina las palabras comunes (stop words)
+        # Delete stop words
         stop_words = set(stopwords.words('english'))
         word_tokens = word_tokenize(text)
         filtered_text = [word for word in word_tokens if word not in stop_words]
 
         cleaned_text_list.append(filtered_text)
 
-    # Devuelve el texto limpio
     return {'text': cleaned_text_list}
