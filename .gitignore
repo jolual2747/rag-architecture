@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Data 
-embeddings_dataset.csv
+#embeddings_dataset.csv
 
 # Distribution / packaging
 .Python
