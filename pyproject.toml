@@ -17,6 +17,7 @@ protobuf = "3.20.0"
 langchain = "^0.1.13"
 unstructured = "0.7.12"
 pypdf = "^4.1.0"
+tiktoken = "^0.6.0"
 
 
 [build-system]
