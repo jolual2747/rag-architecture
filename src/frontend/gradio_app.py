@@ -3,6 +3,7 @@ import pandas as pd
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.api.models import Collection
+from typing import List
 from src.utils import make_a_query
 
 def load_collection(path: str, collection_name: str) -> Collection:
@@ -20,27 +21,42 @@ def load_collection(path: str, collection_name: str) -> Collection:
     """
     chroma_client = chromadb.Client()
     try:
-        print(chromadb.__version__)
-        client_persistent = chromadb.PersistentClient(path=path) #'../data/data_embeddings'
-    except:
+        client_persistent = chromadb.PersistentClient(path=path)
+    except Exception:
         raise FileNotFoundError(f"Path for database vector may not exists {path}")
 
-    sentence_transformer_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name="all-MiniLM-L6-v2"
+    if not any([collection_name == collection.name for collection in client_persistent.list_collections()]):
+        raise FileNotFoundError(f"Collection may not exists {collection_name}")
+    db_embeddings = client_persistent.get_collection(
+        name=collection_name
     )
-
-    db_embeddings = client_persistent.get_or_create_collection(
-        name=collection_name, 
-        embedding_function= sentence_transformer_function
-    )
-
     return db_embeddings
+
+def get_available_collections() -> List[str]:
+    """Gets all available collections.
+
+    Returns:
+        List with available collections names.
+    """
+    client_persistent = chromadb.PersistentClient(path='./data/data_embeddings') 
+    return [collection.name for collection in client_persistent.list_collections()]
 
 def make_query_wrapper(
         collection_name: str, 
         query: str,
         n_results: int
 ) -> pd.DataFrame: 
+    """
+    Wrapper for make query function for Gradio interface.
+
+    Args:
+        collection_name: Collection name from Chroma's data.
+        query: Description.
+        n_results: Number of results to retrieve.
+
+    Returns:
+        DataFrame with results.
+    """
     db = load_collection(path='./data/data_embeddings', collection_name=collection_name)
     return make_a_query(
         query=query,
@@ -48,25 +64,26 @@ def make_query_wrapper(
         n_results=int(n_results)
     )
 
-def main():
+def main() -> None:
     """
     Main of the Gradio's app.
     """
-    db = load_collection('./data/data_embeddings', 'movies_db_embeddings')
+    collections = get_available_collections()
     interface = gr.Interface(
         fn=make_query_wrapper,
         inputs=[
-            gr.Textbox(lines=5, placeholder="Collection name", label="Collection name"),
-            gr.Textbox(lines=5, placeholder="Enter your description...", label="Query"),
-            gr.Number(minimum=1, maximum=10, value=3, label="Número de resultados")
+            gr.Dropdown(choices=collections, label = "Available Collections"),
+            gr.Textbox(lines=5, placeholder="Enter your description...", label="Query", style={"width": "300px"}),
+            gr.Number(minimum=1, maximum=10, value=3, label="Número de resultados", style={"width": "300px"})
         ],
-        outputs=gr.Dataframe(type="pandas", label="Resultados"),
-        title="Buscador de pelí­culas",
-        description="Introduce tu consulta, selecciona un género y define una puntuación mí­nima para buscar pelí­culas.",
+        outputs=gr.Dataframe(type="pandas", label="Results", style={"font-size": "16px", "column-heigth": "400px"}),
+        title="Movies Search Engine",
+        description="Enter a description to get movies recommendations.",
+        style={"width": "300px"}
     )
 
     # Launch the interface
-    interface.launch()
+    interface.launch(debug=True)
 
 if __name__ == "__main__":
     main()
