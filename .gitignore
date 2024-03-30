@@ -11,7 +11,8 @@ flagged/
 
 # Data 
 embeddings_dataset.csv
-data_embeddings/
+# data/data_embeddings/
+# data/data_embeddings/chroma.sqlite3
 
 # Distribution / packaging
 .Python
