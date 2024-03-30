@@ -11,6 +11,7 @@ flagged/
 
 # Data 
 embeddings_dataset.csv
+data_embeddings/
 
 # Distribution / packaging
 .Python

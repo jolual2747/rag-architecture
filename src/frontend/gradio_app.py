@@ -1,5 +1,6 @@
 import gradio as gr
 import pandas as pd
+import os
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.api.models import Collection
@@ -19,7 +20,7 @@ def load_collection(path: str, collection_name: str) -> Collection:
     Returns:
         Collection with data.
     """
-    chroma_client = chromadb.Client()
+    # chroma_client = chromadb.Client()
     try:
         client_persistent = chromadb.PersistentClient(path=path)
     except Exception:
@@ -27,8 +28,19 @@ def load_collection(path: str, collection_name: str) -> Collection:
 
     if not any([collection_name == collection.name for collection in client_persistent.list_collections()]):
         raise FileNotFoundError(f"Collection may not exists {collection_name}")
+    
+    if "openai" in collection_name:
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+            api_key=openai_api_key,
+            model_name = 'text-embedding-ada-002'
+        )
+    else:
+        embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+
     db_embeddings = client_persistent.get_collection(
-        name=collection_name
+        name=collection_name,
+        embedding_function=embedding_function
     )
     return db_embeddings
 
@@ -73,10 +85,10 @@ def main() -> None:
         fn=make_query_wrapper,
         inputs=[
             gr.Dropdown(choices=collections, label = "Available Collections"),
-            gr.Textbox(lines=5, placeholder="Enter your description...", label="Query", style={"width": "300px"}),
-            gr.Number(minimum=1, maximum=10, value=3, label="Número de resultados", style={"width": "300px"})
+            gr.Textbox(lines=5, placeholder="Enter your description...", label="Query"),
+            gr.Number(minimum=1, maximum=10, value=3, label="Number of results")
         ],
-        outputs=gr.Dataframe(type="pandas", label="Results", style={"font-size": "16px", "column-heigth": "400px"}),
+        outputs=gr.Dataframe(type="pandas", label="Results", style={"font-size": "12px"}),
         title="Movies Search Engine",
         description="Enter a description to get movies recommendations.",
         style={"width": "300px"}
