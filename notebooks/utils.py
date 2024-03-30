@@ -6,18 +6,23 @@ from chromadb.api.models.Collection import Collection
 import re
 import nltk
 from typing import List
+from chromadb.api.models.Collection import Collection
+import pandas as pd
+
+nltk.download('stopwords')
+nltk.download('punkt')
 
 def download_nltk_resources(resources: List[str]) -> None:
-    """Downloads nltk resources if not exists locally.
+    """Downloads nltk resources if not exist.
 
     Args:
-        resources: List of resources.
+        resources: Resources list to download.
     """
+    
     for resource in resources:
         try:
             nltk.data.find(resource)
         except:
-            print(f"Resource {resource} not found! Proceeding to download it...")
             nltk.download(resource)
 
 def clean_text(sentence_batch) -> dict:
@@ -32,6 +37,16 @@ def clean_text(sentence_batch) -> dict:
     # Downloads nltk resources if not exits
     download_nltk_resources(resources=['corpora/stopwords', 'tokenizers/punkt'])
 
+    """Cleans a batch of data.
+
+    Args:
+        sentence_batch: Batch of data.
+
+    Returns:
+        Dict with "text": and cleaned data.
+    """
+
+    download_nltk_resources(resources=["corpora/stopwords", "tokenizers/punkt"])
     # Extracts text from the batch
     text_list = sentence_batch['text']
 
@@ -65,19 +80,19 @@ def clean_text(sentence_batch) -> dict:
     return {'text': cleaned_text_list}
 
 def make_a_query(
-    query: str,
-    db: Collection,
-    n_results: int = 3
+        query: str,
+        db: Collection,
+        n_results: int = 3
 ) -> pd.DataFrame:
-    """Make a query to a vector store and retrieve results by semantic search.
+    """Makes a query into Embedding Database through semantic search. 
 
     Args:
-        query: Query.
-        db: Vector database.
-        n_results: N results to retrieve.
+        query: Query as string.
+        db: Collection (Embedding database).
+        n_results: Number of results to retrieve. Defaults to 3.
 
     Returns:
-        DataFrame: DataFrame with metadata.
+        DataFrame with results.
     """
     results = db.query(
         query_texts=[query],
