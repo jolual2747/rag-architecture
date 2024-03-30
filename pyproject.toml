@@ -14,6 +14,9 @@ sentence-transformers = "^2.6.1"
 mapply = "^0.1.25"
 openai = "1.0.0"
 protobuf = "3.20.0"
+langchain = "^0.1.13"
+unstructured = "0.7.12"
+pypdf = "^4.1.0"
 
 
 [build-system]
