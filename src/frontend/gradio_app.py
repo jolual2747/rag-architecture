@@ -5,7 +5,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.api.models import Collection
 from typing import List
-from src.utils import make_a_query
+from utils import make_a_query
 
 def load_collection(path: str, collection_name: str) -> Collection:
     """Loads collection from vector database.

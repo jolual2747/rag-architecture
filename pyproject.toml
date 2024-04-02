@@ -12,13 +12,14 @@ gradio = "3.47.1"
 pandas = "^2.2.1"
 sentence-transformers = "^2.6.1"
 mapply = "^0.1.25"
-openai = "1.0.0"
+openai = "^1.14.3"
 protobuf = "3.20.0"
 langchain = "^0.1.13"
 unstructured = "0.7.12"
 pypdf = "^4.1.0"
 tiktoken = "^0.6.0"
-
+streamlit = "^1.32.2"
+langchain-openai = "^0.1.1"
 
 [build-system]
 requires = ["poetry-core"]
