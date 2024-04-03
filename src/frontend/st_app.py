@@ -8,6 +8,9 @@ def start_over_with_new_document():
     # display message to user
     st.info('Please upload new documents to continue after clearing or updating the current ones.')
 
+def clear_text_input():
+    st.session_state.text_input = ''
+
 def main() -> None:
     """
     Main of the Streamlit app. 
@@ -19,7 +22,7 @@ def main() -> None:
         st.title("Upload a document to interact with")
         uploaded_file = st.file_uploader("Upload a document", type=["pdf"])
 
-        if uploaded_file:
+        if uploaded_file and st.button("Start chatting!"):
             tmp_route = "./src/frontend/tmp"
             clean_prod_workspace(tmp_route)
             file_name = f"{tmp_route}/{uploaded_file.name}"
@@ -30,6 +33,7 @@ def main() -> None:
             st.success("Document uploaded successfully!")
 
             st.session_state.vs = create_vector_database_from_pdf(file_name)
+            clean_prod_workspace(tmp_route)
     
     if uploaded_file and 'vs' in st.session_state:
         # user's question text input widget
@@ -38,6 +42,11 @@ def main() -> None:
             vector_store = st.session_state.vs
             answer = answer_a_question(q, vector_store)
             st.write(answer)
+
+        if st.session_state.text_input:
+            st.button('New question for new context', on_click=start_over_with_new_document, key='new_question_new_context')
+    else:
+        st.info('Please upload one or more files to continue.')
 
         # if prompt := st.chat_input("What is up?"):
         #     with st.chat_message("user"):

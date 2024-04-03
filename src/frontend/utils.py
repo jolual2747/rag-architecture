@@ -10,6 +10,7 @@ import os
 import pandas as pd
 import glob
 from typing import Dict, Any
+import streamlit as st
 
 def make_a_query(
         query: str,
@@ -63,6 +64,7 @@ def clean_prod_workspace(path: str) -> None:
         except Exception:
             print('File cannot be removed!')
 
+@st.cache_resource
 def create_vector_database_from_pdf(pdf_path: str) -> VectorStoreRetriever:
     """Creates a Vector Database on memory based on a pdf file and returns a Vector Store Retriever.
 
