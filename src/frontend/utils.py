@@ -103,7 +103,8 @@ def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[st
     """
     llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
-        temperature = 0.0
+        temperature = 0.0,
+        streaming=True
     )
 
     qa_chain_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
@@ -113,5 +114,11 @@ def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[st
         return_source_documents=True,
         verbose = True
     )
-    return qa_chain_with_sources.invoke({"question": question})["answer"]
+    return qa_chain_with_sources.invoke({"question": question})
+    # return test_stream(question, qa_chain_with_sources)
+
+
+def test_stream(prompt, chain):
+    for stream in chain.stream(prompt):
+        yield stream
 

@@ -1,6 +1,13 @@
 import streamlit as st
 from utils import clean_prod_workspace, create_vector_database_from_pdf, answer_a_question
 
+def start_over_with_new_document():
+    st.session_state.text_input = ''
+    # delete the vector store from the session state
+    del st.session_state.vs
+    # display message to user
+    st.info('Please upload new documents to continue after clearing or updating the current ones.')
+
 def main() -> None:
     """
     Main of the Streamlit app. 
@@ -12,7 +19,7 @@ def main() -> None:
         st.title("Upload a document to interact with")
         uploaded_file = st.file_uploader("Upload a document", type=["pdf"])
 
-        if uploaded_file is not None:
+        if uploaded_file:
             tmp_route = "./src/frontend/tmp"
             clean_prod_workspace(tmp_route)
             file_name = f"{tmp_route}/{uploaded_file.name}"
@@ -22,14 +29,19 @@ def main() -> None:
             
             st.success("Document uploaded successfully!")
 
-            retriever = create_vector_database_from_pdf(file_name)
+            st.session_state.vs = create_vector_database_from_pdf(file_name)
     
-    if uploaded_file is not None:
+    if uploaded_file and 'vs' in st.session_state:
         # user's question text input widget
         q = st.text_input('Ask one or more questions about the content of the uploaded data:', key='text_input')
         if q:
-            answer = answer_a_question(q, retriever)
-            st.text_area('LLM Answer: ', value=answer, height=200)
+            vector_store = st.session_state.vs
+            answer = answer_a_question(q, vector_store)
+            st.write(answer)
+
+        # if prompt := st.chat_input("What is up?"):
+        #     with st.chat_message("user"):
+        #         st.markdown(prompt)
 
 if __name__ == "__main__":
     main()
