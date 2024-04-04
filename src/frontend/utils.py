@@ -97,7 +97,7 @@ def create_vector_database_from_pdf(pdf_path: str) -> VectorStoreRetriever:
     return retriever
 
 def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[str, Any]:
-    """_summary_
+    """Answer a question based on Documents stored in a Vector Store.
 
     Args:
         question (str): _description_

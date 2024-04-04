@@ -40,7 +40,7 @@ def main() -> None:
         q = st.text_input('Ask one or more questions about the content of the uploaded data:', key='text_input')
         if q:
             vector_store = st.session_state.vs
-            answer = answer_a_question(q, vector_store)
+            answer = answer_a_question(q, vector_store)["answer"]
             st.write(answer)
 
         if st.session_state.text_input:
