@@ -11,8 +11,10 @@ from langchain.document_loaders.pdf import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
+from langchain.chains import ConversationalRetrievalChain
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain.chains.conversational_retrieval.base import BaseConversationalRetrievalChain
+from langchain.prompts import SystemMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
 from _templates import combine_docs_template_customer_service
 
@@ -123,6 +125,50 @@ def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[st
     return qa_chain_with_sources.invoke({"question": question})
     # return test_stream(question, qa_chain_with_sources)
 
+def create_chatbot(
+        retriever: VectorStoreRetriever,
+        mode: str = "Chat with documents"
+    ) -> BaseConversationalRetrievalChain:
+    """Initialize a ConversationalRetrievalChain as a Customer Service Chatbot.
+
+    Args:
+        retriever (VectorStoreRetriever): _description_
+
+    Returns:
+        BaseConversationalRetrievalChain: _description_
+    """
+    llm = ChatOpenAI(
+        model_name = "gpt-3.5-turbo",
+        temperature = 0.0,
+        streaming=True
+    )
+    if mode == "Chat with documents":
+
+        return RetrievalQAWithSourcesChain.from_chain_type(
+            llm = llm,
+            chain_type = "stuff",
+            retriever = retriever,
+            return_source_documents=True,
+            verbose = True
+        )
+    else:
+        memory = ConversationBufferMemory(memory_key="chat_history", output_key="answer", return_messages=True)
+        condense_question_llm = ChatOpenAI(
+            model_name = "gpt-3.5-turbo",
+            temperature = 0.0
+        )
+        qa = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            verbose=True,
+            memory=memory,
+            return_generated_question=False,
+            retriever=retriever,
+            condense_question_llm = condense_question_llm,
+            #condense_question_prompt=PromptTemplate.from_template(custom_template),
+            get_chat_history=lambda h : h
+        )
+        qa.combine_docs_chain.llm_chain.prompt.messages[0] = SystemMessagePromptTemplate.from_template(combine_docs_template_customer_service)
+        return qa
 def create_customer_service_chatbot(
         condense_question_llm: BaseLanguageModel,
         retriever: VectorStoreRetriever
@@ -137,3 +183,18 @@ def create_customer_service_chatbot(
         BaseConversationalRetrievalChain: _description_
     """
     memory = ConversationBufferMemory(memory_key="chat_history", output_key="answer", return_messages=True)
+    llm = ChatOpenAI(
+        model_name = "gpt-3.5-turbo",
+        temperature = 0.0
+    )
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        verbose=True,
+        memory=memory,
+        return_generated_question=False,
+        retriever=retriever,
+        condense_question_llm = condense_question_llm,
+        #condense_question_prompt=PromptTemplate.from_template(custom_template),
+        get_chat_history=lambda h : h
+    )
+    return qa
