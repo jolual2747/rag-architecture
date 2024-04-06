@@ -1,3 +1,8 @@
+import os
+import pandas as pd
+import glob
+from typing import Dict, Any
+import streamlit as st
 from chromadb.api.models.Collection import Collection
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai.chat_models import ChatOpenAI
@@ -6,17 +11,16 @@ from langchain.document_loaders.pdf import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
-import os
-import pandas as pd
-import glob
-from typing import Dict, Any
-import streamlit as st
+from langchain_core.language_models.base import BaseLanguageModel
+from langchain.chains.conversational_retrieval.base import BaseConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from _templates import combine_docs_template_customer_service
 
 def make_a_query(
         query: str,
         db: Collection,
         n_results: int = 3
-) -> pd.DataFrame:
+    ) -> pd.DataFrame:
     """
     Makes a query into Embedding Database through semantic search. 
 
@@ -119,8 +123,17 @@ def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[st
     return qa_chain_with_sources.invoke({"question": question})
     # return test_stream(question, qa_chain_with_sources)
 
+def create_customer_service_chatbot(
+        condense_question_llm: BaseLanguageModel,
+        retriever: VectorStoreRetriever
+    ) -> BaseConversationalRetrievalChain:
+    """Initialize a ConversationalRetrievalChain as a Customer Service Chatbot.
 
-def test_stream(prompt, chain):
-    for stream in chain.stream(prompt):
-        yield stream
+    Args:
+        condense_question_llm (BaseLanguageModel): _description_
+        retriever (VectorStoreRetriever): _description_
 
+    Returns:
+        BaseConversationalRetrievalChain: _description_
+    """
+    memory = ConversationBufferMemory(memory_key="chat_history", output_key="answer", return_messages=True)

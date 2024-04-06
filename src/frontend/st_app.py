@@ -1,5 +1,9 @@
 import streamlit as st
-from utils import clean_prod_workspace, create_vector_database_from_pdf, answer_a_question
+from utils import (
+    clean_prod_workspace, 
+    create_vector_database_from_pdf, 
+    answer_a_question
+)
 
 def start_over_with_new_document():
     st.session_state.text_input = ''
