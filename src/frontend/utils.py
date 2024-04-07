@@ -126,7 +126,8 @@ def create_retrieval_qa(retriever: VectorStoreRetriever) -> Dict[str, Any]:
 
 def create_chatbot(
         retriever: VectorStoreRetriever,
-        mode: str = "Chat with documents"
+        mode: str = "Chat with documents",
+        company_name: str = None
     ) -> BaseConversationalRetrievalChain:
     """Initialize a ConversationalRetrievalChain as a Customer Service Chatbot.
 
@@ -143,11 +144,13 @@ def create_chatbot(
         )
     else:
         return create_customer_service_chatbot(
-            retriever=retriever
+            retriever=retriever,
+            company_name = company_name
         )
     
 def create_customer_service_chatbot(
-        retriever: VectorStoreRetriever
+        retriever: VectorStoreRetriever,
+        company_name: str
     ) -> BaseConversationalRetrievalChain:
     """Initialize a ConversationalRetrievalChain as a Customer Service Chatbot.
 
@@ -178,5 +181,5 @@ def create_customer_service_chatbot(
         #condense_question_prompt=PromptTemplate.from_template(custom_template),
         get_chat_history=lambda h : h
     )
-    qa.combine_docs_chain.llm_chain.prompt.messages[0] = SystemMessagePromptTemplate.from_template(combine_docs_template_customer_service)
+    qa.combine_docs_chain.llm_chain.prompt.messages[0] = SystemMessagePromptTemplate.from_template(combine_docs_template_customer_service.replace("{company}", company_name))
     return qa
