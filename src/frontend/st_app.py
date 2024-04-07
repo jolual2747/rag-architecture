@@ -2,8 +2,6 @@ import streamlit as st
 from utils import (
     clean_prod_workspace, 
     create_vector_database_from_pdf, 
-    answer_a_question,
-    create_customer_service_chatbot,
     create_chatbot
 )
 
@@ -11,6 +9,7 @@ def start_over_with_new_document():
     st.session_state.text_input = ''
     # delete the vector store from the session state
     del st.session_state.vs
+    del st.session_state.bot
     # display message to user
     st.info('Please upload new documents to continue after clearing or updating the current ones.')
 
@@ -49,6 +48,7 @@ def main() -> None:
         if q:
             vector_store = st.session_state.vs
             answer = st.session_state.bot({"question":q})["answer"]
+            print(answer)
             st.write(answer)
 
         if st.session_state.text_input:

@@ -12,7 +12,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 from langchain.chains import ConversationalRetrievalChain
-from langchain_core.language_models.base import BaseLanguageModel
 from langchain.chains.conversational_retrieval.base import BaseConversationalRetrievalChain
 from langchain.prompts import SystemMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
@@ -85,9 +84,9 @@ def create_vector_database_from_pdf(pdf_path: str) -> VectorStoreRetriever:
     loader = PyPDFLoader(pdf_path)
     data = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size = 500,
+        chunk_size = 1000,
         length_function=len,
-        chunk_overlap=50
+        chunk_overlap=100
     )
     documents = text_splitter.split_documents(data)
 
@@ -102,8 +101,8 @@ def create_vector_database_from_pdf(pdf_path: str) -> VectorStoreRetriever:
     retriever = vector_store.as_retriever(search_kwargs = {"k":4})
     return retriever
 
-def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[str, Any]:
-    """Answer a question based on Documents stored in a Vector Store.
+def create_retrieval_qa(retriever: VectorStoreRetriever) -> Dict[str, Any]:
+    """Creates a RetrievalQAWithSourcesChain based on Documents stored in a Vector Store.
 
     Args:
         question (str): _description_
@@ -122,7 +121,7 @@ def answer_a_question(question: str, retriever: VectorStoreRetriever) -> Dict[st
         return_source_documents=True,
         verbose = True
     )
-    return qa_chain_with_sources.invoke({"question": question})
+    return qa_chain_with_sources
     # return test_stream(question, qa_chain_with_sources)
 
 def create_chatbot(
@@ -137,40 +136,17 @@ def create_chatbot(
     Returns:
         BaseConversationalRetrievalChain: _description_
     """
-    llm = ChatOpenAI(
-        model_name = "gpt-3.5-turbo",
-        temperature = 0.0,
-        streaming=True
-    )
     if mode == "Chat with documents":
 
-        return RetrievalQAWithSourcesChain.from_chain_type(
-            llm = llm,
-            chain_type = "stuff",
-            retriever = retriever,
-            return_source_documents=True,
-            verbose = True
+        return create_retrieval_qa(
+            retriever=retriever
         )
     else:
-        memory = ConversationBufferMemory(memory_key="chat_history", output_key="answer", return_messages=True)
-        condense_question_llm = ChatOpenAI(
-            model_name = "gpt-3.5-turbo",
-            temperature = 0.0
+        return create_customer_service_chatbot(
+            retriever=retriever
         )
-        qa = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            verbose=True,
-            memory=memory,
-            return_generated_question=False,
-            retriever=retriever,
-            condense_question_llm = condense_question_llm,
-            #condense_question_prompt=PromptTemplate.from_template(custom_template),
-            get_chat_history=lambda h : h
-        )
-        qa.combine_docs_chain.llm_chain.prompt.messages[0] = SystemMessagePromptTemplate.from_template(combine_docs_template_customer_service)
-        return qa
+    
 def create_customer_service_chatbot(
-        condense_question_llm: BaseLanguageModel,
         retriever: VectorStoreRetriever
     ) -> BaseConversationalRetrievalChain:
     """Initialize a ConversationalRetrievalChain as a Customer Service Chatbot.
@@ -185,6 +161,11 @@ def create_customer_service_chatbot(
     memory = ConversationBufferMemory(memory_key="chat_history", output_key="answer", return_messages=True)
     llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
+        temperature = 0.0,
+        streaming=True
+    )
+    condense_question_llm = ChatOpenAI(
+        model_name = "gpt-3.5-turbo",
         temperature = 0.0
     )
     qa = ConversationalRetrievalChain.from_llm(
@@ -197,4 +178,5 @@ def create_customer_service_chatbot(
         #condense_question_prompt=PromptTemplate.from_template(custom_template),
         get_chat_history=lambda h : h
     )
+    qa.combine_docs_chain.llm_chain.prompt.messages[0] = SystemMessagePromptTemplate.from_template(combine_docs_template_customer_service)
     return qa
