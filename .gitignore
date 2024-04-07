@@ -14,6 +14,9 @@ embeddings_dataset.csv
 # data/data_embeddings/
 # data/data_embeddings/chroma.sqlite3
 
+# Test notebooks
+test.ipynb
+
 # Distribution / packaging
 .Python
 build/

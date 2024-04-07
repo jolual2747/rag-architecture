@@ -12,6 +12,14 @@ Embeddings in NLP refer to vector representations of words, phrases, or document
 ## 3. Vector Databases and Semantic Search
 
 Vector databases store embeddings generated from textual data, enabling efficient semantic search and retrieval. These databases organize embeddings in a high-dimensional vector space, allowing for similarity-based search queries. Semantic search utilizes vector similarity measures to retrieve documents or passages relevant to a user's query, considering semantic context rather than just keyword matching.
+Here an example with Movies Search and Recommendation based on a description as query:
+
+```sh
+git clone https://github.com/jolual2747/rag-architecture.git
+cd rag-architecture
+poetry install --no-root
+make build_gradio_app
+```
 
 ## 4. Building a RAG Pipeline
 
